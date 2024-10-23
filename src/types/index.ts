@@ -1,1 +1,1 @@
-export * from "./deep-sort";
+export * from "./primitive";

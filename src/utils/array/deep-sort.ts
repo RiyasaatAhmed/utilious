@@ -1,6 +1,7 @@
-import { Primitive } from "../types/deep-sort";
+import { Primitive } from "../../types/primitive";
 
-/*
+/**
+ *
  * Generic sorting function that can handle strings, numbers, booleans, and nested objects/arrays.
  * @param array - The array of objects/arrays to sort.
  * @param path - The key or nested path to sort by (e.g., 'user.name' or 'stats[0].score').
@@ -9,7 +10,8 @@ import { Primitive } from "../types/deep-sort";
 export function deepSort<T extends Record<string, unknown>>(
   array: T[],
   path: string,
-  order: "asc" | "desc" = "asc"
+  order: "asc" | "desc" = "asc",
+  pushUndefinedToEnd = false
 ): T[] {
   // Helper function to resolve the nested value from an object using a string path
   const resolveValue = (
@@ -56,10 +58,16 @@ export function deepSort<T extends Record<string, unknown>>(
     const aValue = resolveValue(a, path);
     const bValue = resolveValue(b, path);
 
-    // Custom handling for undefined values: push undefined values to the end
     if (aValue === undefined && bValue === undefined) return 0;
-    if (aValue === undefined) return order === "asc" ? 1 : -1;
-    if (bValue === undefined) return order === "asc" ? -1 : 1;
+    if (pushUndefinedToEnd) {
+      // Custom handling for undefined values: push undefined values to the end
+      if (aValue === undefined) return 1;
+      if (bValue === undefined) return -1;
+    } else {
+      // Custom handling for undefined values: push undefined values to the end for sort order asc only
+      if (aValue === undefined) return order === "asc" ? 1 : -1;
+      if (bValue === undefined) return order === "asc" ? -1 : 1;
+    }
 
     const result = compare(aValue, bValue);
     return order === "asc" ? result : -result;
